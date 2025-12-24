@@ -1,0 +1,44 @@
+# AI
+logiclyst_llama3_final/
+*.bin
+*.pth
+*.onnx
+*.gguf
+*.safetensors
+
+# Docker
+.dockerignore
+data/
+db_data/
+
+# Logs and Databases
+*.log
+local_settings.py
+*.db
+*.sqlite3
+
+# Testing and Coverage
+.tox/
+.nox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# MyPy and Type Checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.env
+__pycache__/
+venv/
+*.pyc
+# Temporary/Runtime Files
+*.bak
+*.tmp
+*.temp
+.python-version

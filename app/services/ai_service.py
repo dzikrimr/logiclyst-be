@@ -1,0 +1,66 @@
+import torch
+import os
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from peft import PeftModel 
+from app.core.config import settings
+
+class AIService:
+    def __init__(self):
+        # Konfigurasi ID
+        base_model_id = "meta-llama/Meta-Llama-3-8B-Instruct" 
+        self.adapter_id = settings.MODEL_PATH 
+        
+        # Ambil Hugging Face Token dari Environment Variable
+        hf_token = os.getenv("HF_TOKEN")
+
+        # Konfigurasi 4-bit Quantization
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.float16,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+        )
+
+        print(f"⏳ Mendownload/Memuat Base Model: {base_model_id}...")
+        self.tokenizer = AutoTokenizer.from_pretrained(base_model_id, token=hf_token)
+        
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        # Muat Base Model dalam mode 4-bit ke GPU
+        base_model = AutoModelForCausalLM.from_pretrained(
+            base_model_id,
+            quantization_config=bnb_config,
+            device_map="auto", 
+            token=hf_token
+        )
+
+        # Adapter
+        print(f"⏳ Menempelkan Adapter Logiclyst dari HF: {self.adapter_id}...")
+        self.model = PeftModel.from_pretrained(
+            base_model, 
+            self.adapter_id,
+            token=hf_token
+        )
+        
+    async def analyze_logic(self, text: str):
+        # Format Prompt Llama-3 Instruct
+        prompt = f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nIdentifikasi sesat logika: {text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
+        
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+        
+        with torch.no_grad():
+            outputs = self.model.generate(
+                **inputs, 
+                max_new_tokens=150,
+                temperature=0.1, 
+                do_sample=True,
+                pad_token_id=self.tokenizer.eos_token_id 
+            )
+            
+        decoded = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        response = decoded.split("assistant")[-1].strip()
+        return response
+
+# Singleton instance
+ai_logic_service = AIService()
