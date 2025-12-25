@@ -19,7 +19,6 @@ jobs:
 
       - name: Build and push
         run: |
-          # Mengubah nama repository menjadi huruf kecil karena GHCR hanya menerima lowercase
           REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           docker build -t ghcr.io/$REPO_LOWER:latest .
           docker push ghcr.io/$REPO_LOWER:latest
