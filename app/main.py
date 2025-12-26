@@ -18,17 +18,22 @@ async def analyze_argument(
 ):
     """
     Endpoint utama untuk keyboard Android.
-    Menerima teks, memproses lewat LLM, dan mengembalikan analisis terstruktur.
+    Menerima teks dan sensitivity, memproses lewat LLM, 
+    dan mengembalikan analisis terstruktur.
     """
     try:
-        # Kirim input ke model Llama-3
-        raw_output = await ai_logic_service.analyze_logic(request.text)
+        sensitivity = getattr(request, 'sensitivity', 0.5)
+
+        raw_output = await ai_logic_service.analyze_logic(request.text, sensitivity=sensitivity)
         
-        # Parsing output mentah
+        # Parsing output mentah menjadi dict terstruktur
         parsed_result = logic_parser.parse_response(raw_output)
-        print(f"--- RAW OUTPUT DARI AI ---\n{raw_output}\n--------------------------")
         
-        # Return Response sesuai Schema
+        print(f"--- ANALYZE REQUEST ---")
+        print(f"Input: {request.text}")
+        print(f"Sensitivity: {sensitivity}")
+        print(f"--- RAW OUTPUT AI ---\n{raw_output}\n--------------------------")
+        
         return LogicResponse(
             input=request.text,
             label=parsed_result["label"],

@@ -30,13 +30,21 @@ class AIService:
         print(f"⏳ Menempelkan Adapter Logiclyst dari HF: {self.adapter_id}...")
         self.model = PeftModel.from_pretrained(base_model, self.adapter_id, token=hf_token)
         
-    async def analyze_logic(self, text: str):
+    async def analyze_logic(self, text: str, sensitivity: float = 0.5):
+        """
+        Analisis teks dengan parameter sensitivity.
+        Sensitivity 1.0 (Critical) -> Temperature Rendah (0.1) -> Kaku/Akurat
+        Sensitivity 0.1 (Relaxed) -> Temperature Tinggi (1.0) -> Luwes/Kreatif
+        """
+        # Rumus konversi sensitivity ke temperature
+        computed_temp = max(0.1, 1.1 - sensitivity)
         instruction = (
                 "Anda adalah ahli logika. Tugas Anda adalah mengidentifikasi jenis kesesatan logika (logical fallacy) dari kalimat yang diberikan secara objektif.\n"
                 "1. Nama Fallacy: Tulis di antara bintang dua (contoh: **Nama Jenis Fallacy**).\n"
                 "2. Penjelasan: Berikan penjelasan teknis mengapa itu salah. Gunakan minimal 3 kalimat.\n"
                 "3. Lawan: Berikan 3 sanggahan logis. WAJIB diawali dengan kata 'Lawan:' dan gunakan nomor (1., 2., 3.).\n"
                 "PENTING: Jangan akhiri jawaban sebelum menuliskan bagian 'Lawan:' secara lengkap."
+                "PENTING: Jangan terpaku pada satu jenis fallacy saja. Evaluasi berdasarkan dataset latihan Anda."
             )
         
         prompt = f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n{instruction}\n\nKalimat: {text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
@@ -47,9 +55,10 @@ class AIService:
             outputs = self.model.generate(
                 **inputs, 
                 max_new_tokens=512,
-                temperature=0.2,   
+                temperature=computed_temp, 
                 top_p=0.9,
-                do_sample=True,
+                repetition_penalty=1.1,
+                do_sample=True if computed_temp > 0.1 else False,
                 pad_token_id=self.tokenizer.eos_token_id 
             )
             
