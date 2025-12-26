@@ -1,3 +1,4 @@
+import torch
 from fastapi import FastAPI, Depends, HTTPException
 from app.services.ai_service import ai_logic_service
 from app.services.logic_parser import logic_parser
