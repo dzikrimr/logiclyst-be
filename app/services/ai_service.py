@@ -35,12 +35,12 @@ class AIService:
         
     async def analyze_logic(self, text: str):
         instruction = (
-            "Tugas: Analisis sesat logika secara detail. "
-            "Aturan Wajib: "
-            "1. Nama Fallacy: Tulis di antara bintang dua, contoh: **Ad Hominem**. "
-            "2. Penjelasan: Berikan penjelasan detail mengapa kalimat tersebut salah secara logika. Jelaskan mekanisme sesat logikanya dan dampaknya terhadap argumen. "
-            "3. Lawan: Berikan minimal 3 poin sanggahan menggunakan nomor (1., 2., 3.). Setiap poin harus berupa argumen tandingan yang kuat dan edukatif untuk mengembalikan diskusi ke jalur yang benar."
-        )
+                "Anda adalah ahli logika. Analisis kalimat yang diberikan dengan struktur WAJIB berikut:\n"
+                "1. Nama Fallacy: Tulis di antara bintang dua (contoh: **Ad Hominem**).\n"
+                "2. Penjelasan: Berikan penjelasan teknis mengapa itu salah. Gunakan minimal 3 kalimat.\n"
+                "3. Lawan: Berikan 3 sanggahan logis. WAJIB diawali dengan kata 'Lawan:' dan gunakan nomor (1., 2., 3.).\n"
+                "PENTING: Jangan akhiri jawaban sebelum menuliskan bagian 'Lawan:' secara lengkap."
+            )
         
         prompt = f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n{instruction}\n\nKalimat: {text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
         
@@ -50,8 +50,9 @@ class AIService:
             outputs = self.model.generate(
                 **inputs, 
                 max_new_tokens=512,
-                temperature=0.2,   
+                temperature=0.1,   
                 top_p=0.9,
+                repetition_penalty=1.2,
                 do_sample=True,
                 pad_token_id=self.tokenizer.eos_token_id 
             )
