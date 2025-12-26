@@ -3,21 +3,28 @@ import re
 class LogicParser:
     @staticmethod
     def parse_response(raw_text: str) -> dict:
-        # Mencari label di antara asteris 
+        # Mencari Label (Nama Fallacy)
         label_match = re.search(r"\*\*(.*?)\*\*", raw_text)
-        label = label_match.group(1) if label_match else "Unknown"
+        label = label_match.group(1).strip() if label_match else "Unknown"
         
-        # Parsing Penjelasan
+        # Parsing Penjelasan 
         explanation = "Analisis pola argumen selesai."
         if "Penjelasan:" in raw_text:
-            explanation = raw_text.split("Penjelasan:")[1].split("Lawan:")[0].strip()
+            # Mengambil teks setelah 'Penjelasan:' sampai sebelum kata 'Lawan:'
+            explanation_part = raw_text.split("Penjelasan:")[1].split("Lawan:")[0]
+            explanation = explanation_part.strip()
         
         # Parsing Counter-arguments
         counter_args = []
         if "Lawan:" in raw_text:
             counter_section = raw_text.split("Lawan:")[1].strip()
-            items = re.findall(r"(?:^|\n)(?:-|\d\.)\s*(.+)", counter_section)
+            items = re.findall(r"(?:^|\n)(?:-|\*|\d+\.)\s*(.+)", counter_section)
             counter_args = [item.strip() for item in items if item.strip()]
+
+        # Jika regex gagal, coba ambil baris per baris sebagai fallback
+        if not counter_args and "Lawan:" in raw_text:
+            lines = raw_text.split("Lawan:")[1].strip().split('\n')
+            counter_args = [line.strip('- ').strip() for line in lines if len(line.strip()) > 5]
 
         return {
             "label": label,

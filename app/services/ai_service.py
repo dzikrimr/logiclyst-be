@@ -34,15 +34,11 @@ class AIService:
         
     async def analyze_logic(self, text: str):
         instruction = (
-            "Identifikasi sesat logika pada kalimat berikut. "
-            "Berikan penjelasan (explanation) yang mendalam dan berikan minimal 3 sanggahan (logical counter-argument). "
-            "Gunakan format tepat seperti ini:\n"
-            "**[Nama Fallacy]**\n"
-            "Penjelasan: [Tulis penjelasan panjang di sini]\n"
-            "Lawan:\n"
-            "- [Sanggahan 1]\n"
-            "- [Sanggahan 2]\n"
-            "- [Sanggahan 3]"
+            "Berikan analisis mendalam tentang sesat logika (logical fallacy). "
+            "Format jawaban HARUS: "
+            "1. Nama fallacy di antara bintang dua (contoh: **Ad Hominem**). "
+            "2. Gunakan kata 'Penjelasan:' diikuti paragraf detail. "
+            "3. Gunakan kata 'Lawan:' diikuti minimal 3 poin sanggahan menggunakan NOMOR (1., 2., 3.)."
         )
         
         prompt = f"<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\n{instruction}\n\nKalimat: {text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n"
@@ -52,7 +48,7 @@ class AIService:
         with torch.no_grad():
             outputs = self.model.generate(
                 **inputs, 
-                max_new_tokens=500,
+                max_new_tokens=512,
                 temperature=0.7,   
                 do_sample=True,
                 pad_token_id=self.tokenizer.eos_token_id 
