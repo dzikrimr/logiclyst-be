@@ -32,8 +32,8 @@ class AIService:
         
     async def analyze_logic(self, text: str):
         instruction = (
-                "Anda adalah ahli logika. Analisis kalimat yang diberikan dengan struktur WAJIB berikut:\n"
-                "1. Nama Fallacy: Tulis di antara bintang dua (contoh: **Ad Hominem**).\n"
+                "Anda adalah ahli logika. Tugas Anda adalah mengidentifikasi jenis kesesatan logika (logical fallacy) dari kalimat yang diberikan secara objektif.\n"
+                "1. Nama Fallacy: Tulis di antara bintang dua (contoh: **Nama Jenis Fallacy**).\n"
                 "2. Penjelasan: Berikan penjelasan teknis mengapa itu salah. Gunakan minimal 3 kalimat.\n"
                 "3. Lawan: Berikan 3 sanggahan logis. WAJIB diawali dengan kata 'Lawan:' dan gunakan nomor (1., 2., 3.).\n"
                 "PENTING: Jangan akhiri jawaban sebelum menuliskan bagian 'Lawan:' secara lengkap."
