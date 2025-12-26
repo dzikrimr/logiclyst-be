@@ -11,3 +11,4 @@ class LogicResponse(BaseModel):
     is_fallacy: bool
     counter_arguments: List[str] = []
     status: str
+    sensitivity: float = 0.5
